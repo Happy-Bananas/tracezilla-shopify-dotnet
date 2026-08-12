@@ -1,0 +1,23 @@
+name: Tests
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: "8.0.x"
+          cache: true
+          cache-dependency-path: "**/packages.lock.json"
+      - run: dotnet restore tests/TracezillaShopify.Tests/TracezillaShopify.Tests.csproj --locked-mode
+      - run: dotnet build tests/TracezillaShopify.Tests/TracezillaShopify.Tests.csproj --no-restore --configuration Release
+      - run: dotnet test tests/TracezillaShopify.Tests/TracezillaShopify.Tests.csproj --no-build --configuration Release
