@@ -39,6 +39,15 @@ docker compose run --rm app list-shopify-locations
 docker compose run --rm app list-shopify-locations --json
 ```
 
+Synchronize inventory with an explicit source and target (dry run by default):
+
+```bash
+docker compose run --rm app synchronize-inventory \
+  --shopify-location=gid://shopify/Location/123 --tracezilla-warehouse=2 --limit=10
+```
+
+Writes additionally require `--execute --confirm`.
+
 ## Tests
 
 The .NET SDK does not need to be installed on the host:

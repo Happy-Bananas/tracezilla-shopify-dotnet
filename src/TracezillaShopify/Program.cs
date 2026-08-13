@@ -11,6 +11,9 @@ try {
     var limitArgument = args.FirstOrDefault(value => value.StartsWith("--limit=", StringComparison.Ordinal));
     var limit = limitArgument is null ? 10 : int.Parse(limitArgument[8..]);
     var configuration = Configuration.FromEnvironment();
+    if (args.Contains("synchronize-inventory")) {
+        string Value(string name)=>args.FirstOrDefault(x=>x.StartsWith($"--{name}=",StringComparison.Ordinal))?.Split('=',2)[1]??"";var location=Value("shopify-location");var warehouse=int.Parse(Value("tracezilla-warehouse"));var execute=args.Contains("--execute");if(execute&&!args.Contains("--confirm"))throw new ArgumentException("Execution requires both --execute and --confirm.");var inventory=await new SynchronizeInventory(new TracezillaInventoryService(new TracezillaClient(configuration)),new ShopifyInventoryService(new ShopifyClient(configuration))).RunAsync(location,warehouse,!execute,limit);Console.WriteLine(JsonSerializer.Serialize(inventory,new JsonSerializerOptions{WriteIndented=true}));return 0;
+    }
     if (args.Contains("list-shopify-locations")) {
         var locations=await new ShopifyLocationService(new ShopifyClient(configuration)).ReadAsync();
         if(json) Console.WriteLine(JsonSerializer.Serialize(new{count=locations.Count,locations=locations.Select(x=>new{graph_ql_id=x.GraphQlId,legacy_id=x.LegacyId,name=x.Name,is_active=x.IsActive,has_active_inventory=x.HasActiveInventory,fulfills_online_orders=x.FulfillsOnlineOrders,address=new{address1=x.Address.Address1,address2=x.Address.Address2,city=x.Address.City,province=x.Address.Province,country=x.Address.Country,zip=x.Address.Zip}})},new JsonSerializerOptions{WriteIndented=true}));
@@ -30,6 +33,6 @@ try {
     }, new JsonSerializerOptions { WriteIndented = true }) : TableRenderer.Render(result));
     return 0;
 } catch (Exception exception) {
-    Console.Error.WriteLine($"Comparison failed: {exception.Message}");
+    Console.Error.WriteLine($"Command failed: {exception.Message}");
     return 1;
 }
