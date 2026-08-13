@@ -32,6 +32,13 @@ maximum displayed rows in each category and defaults to 10. Differences return
 exit code `0`; configuration and API failures return a non-zero code. Neither
 API is modified.
 
+List all Shopify locations (read-only):
+
+```bash
+docker compose run --rm app list-shopify-locations
+docker compose run --rm app list-shopify-locations --json
+```
+
 ## Tests
 
 The .NET SDK does not need to be installed on the host:
