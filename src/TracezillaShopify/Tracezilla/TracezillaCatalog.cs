@@ -36,4 +36,6 @@ public sealed class TracezillaCatalogService(IJsonClient client, TracezillaSkuMa
         } while (true);
         return items;
     }
+    public async Task<IReadOnlyList<string>> ExistingSkuCodesAsync(CancellationToken cancellationToken = default) => (await ReadAsync(cancellationToken)).Select(x => x.Sku).Distinct().ToArray();
+    public async Task CreateSkuAsync(object payload, CancellationToken cancellationToken = default) { using var _ = await client.PostAsync("skus", payload, cancellationToken); }
 }

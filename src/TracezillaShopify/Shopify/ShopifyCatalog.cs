@@ -20,12 +20,18 @@ public sealed class ShopifyCatalogService(IGraphQlClient client, ShopifyVariantM
 {
     public async Task<IReadOnlyList<CatalogItem>> ReadAsync(CancellationToken cancellationToken = default)
     {
-        var items = new List<CatalogItem>(); string? after = null;
+        var items = new List<CatalogItem>();
+        foreach (var value in await ReadVariantsAsync(cancellationToken)) { var item = mapper.Map(value); if (item is not null) items.Add(item); }
+        return items;
+    }
+    public async Task<IReadOnlyList<JsonElement>> ReadVariantsAsync(CancellationToken cancellationToken = default)
+    {
+        var items = new List<JsonElement>(); string? after = null;
         do {
             using var payload = await client.QueryAsync(GetProductVariants.Document, new { first = 250, after }, cancellationToken);
             if (!payload.RootElement.TryGetProperty("data", out var data) || !data.TryGetProperty("productVariants", out var connection))
                 throw new InvalidDataException("Shopify response is missing productVariants.");
-            foreach (var value in connection.GetProperty("nodes").EnumerateArray()) { var item = mapper.Map(value); if (item is not null) items.Add(item); }
+            foreach (var value in connection.GetProperty("nodes").EnumerateArray()) items.Add(value.Clone());
             var page = connection.GetProperty("pageInfo");
             if (!page.GetProperty("hasNextPage").GetBoolean()) break;
             after = page.GetProperty("endCursor").GetString();
